@@ -1,0 +1,30 @@
+{
+	"ImportPath": "github.com/tsaikd/go-raml-mocker",
+	"GoVersion": "go1.6",
+	"Deps": [
+		{
+			"ImportPath": "github.com/advance512/yaml",
+			"Rev": "e401b2b026855a4fa8e7014d553ae5bdfccb21cd"
+		},
+		{
+			"ImportPath": "github.com/codegangsta/cli",
+			"Rev": "9eaa109385513bdfeb82ae6bb7f89211fec97134"
+		},
+		{
+			"ImportPath": "github.com/tsaikd/KDGoLib",
+			"Rev": "b89d09672d2326fb2b355bb74099cfe7bec3b909"
+		},
+		{
+			"ImportPath": "github.com/tsaikd/gin",
+			"Rev": "6a14b8afec825fc00a6492f13b602ccac6ffce01"
+		},
+		{
+			"ImportPath": "github.com/tsaikd/go-raml-parser",
+			"Rev": "7e82e18ac07cce3f552334c72891db8f87758097"
+		},
+		{
+			"ImportPath": "gopkg.in/fsnotify.v1",
+			"Rev": "30411dbcefb7a1da7e84f75530ad3abe4011b4f8"
+		}
+	]
+}
