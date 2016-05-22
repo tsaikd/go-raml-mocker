@@ -7,15 +7,36 @@ RAML (1.0) web mock server implementation in golang
 
 * Live reload web mock server routes from RAML file
 
-## Install
+## Use pre-build binary from docker hub
+
+* start mock web server
+
+```
+docker run \
+	-p 4000:4000 \
+	-v "${PWD}/example/organisation-api.raml:/raml/organisation-api.raml" \
+	tsaikd/go-raml-mocker:1.0 \
+	go-raml-mocker -f /raml/organisation-api.raml --port 4000
+```
+
+* try to get data from mock web server
+
+```
+curl http://localhost:4000/organisation
+```
+
+## Use golang binary from github source code
+
+### Install
 
 ```
 go get -u -v "github.com/tsaikd/go-raml-mocker"
 ```
 
-## Usage
+### Usage
 
 * start mock web server
+
 
 ```
 go-raml-mocker -f example/organisation-api.raml --port 4000
