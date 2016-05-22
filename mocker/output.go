@@ -1,6 +1,7 @@
 package mocker
 
 import (
+	"bytes"
 	"encoding/json"
 	"net/http"
 	"strconv"
@@ -20,7 +21,12 @@ func outputJSON(c *gin.Context, code int, data interface{}) {
 			c.AbortWithError(http.StatusBadRequest, err)
 			return
 		}
-		c.Data(code, "", jsondata)
+		buffer := bytes.NewBuffer(jsondata)
+		if err = buffer.WriteByte('\n'); err != nil {
+			c.AbortWithError(http.StatusBadRequest, err)
+			return
+		}
+		c.Data(code, "", buffer.Bytes())
 	} else {
 		c.JSON(code, data)
 	}
