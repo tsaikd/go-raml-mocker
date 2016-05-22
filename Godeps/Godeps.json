@@ -7,12 +7,8 @@
 			"Rev": "e401b2b026855a4fa8e7014d553ae5bdfccb21cd"
 		},
 		{
-			"ImportPath": "github.com/codegangsta/cli",
-			"Rev": "9eaa109385513bdfeb82ae6bb7f89211fec97134"
-		},
-		{
 			"ImportPath": "github.com/tsaikd/KDGoLib",
-			"Rev": "a2ea30795fc67f8de6c07f72fcfa436b0d732b9b"
+			"Rev": "443a5595b685fe588255bc1ef0c0a2e061e0fc53"
 		},
 		{
 			"ImportPath": "github.com/tsaikd/gin",
@@ -20,11 +16,7 @@
 		},
 		{
 			"ImportPath": "github.com/tsaikd/go-raml-parser",
-			"Rev": "c6ef7ac90307b1205a736b59725e34216690ef2d"
-		},
-		{
-			"ImportPath": "gopkg.in/fsnotify.v1",
-			"Rev": "30411dbcefb7a1da7e84f75530ad3abe4011b4f8"
+			"Rev": "4bd72f1290f46e831326c9b42176e43183e6cb7a"
 		}
 	]
 }
