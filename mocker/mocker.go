@@ -1,6 +1,7 @@
 package mocker
 
 import (
+	"encoding/json"
 	"regexp"
 
 	"github.com/tsaikd/KDGoLib/errutil"
@@ -17,6 +18,10 @@ var router *gin.Engine
 
 // start mock web server or reset router
 func start(rootdoc parser.RootDocument, addr string) (err error) {
+	if _, err = json.Marshal(rootdoc); err != nil {
+		errutil.Trace(err)
+	}
+
 	if router != nil {
 		router.ResetRoutes()
 		bindRootDocument(router, rootdoc)

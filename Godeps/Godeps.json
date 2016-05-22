@@ -12,7 +12,7 @@
 		},
 		{
 			"ImportPath": "github.com/tsaikd/KDGoLib",
-			"Rev": "b89d09672d2326fb2b355bb74099cfe7bec3b909"
+			"Rev": "a2ea30795fc67f8de6c07f72fcfa436b0d732b9b"
 		},
 		{
 			"ImportPath": "github.com/tsaikd/gin",
@@ -20,7 +20,7 @@
 		},
 		{
 			"ImportPath": "github.com/tsaikd/go-raml-parser",
-			"Rev": "7e82e18ac07cce3f552334c72891db8f87758097"
+			"Rev": "c6ef7ac90307b1205a736b59725e34216690ef2d"
 		},
 		{
 			"ImportPath": "gopkg.in/fsnotify.v1",
