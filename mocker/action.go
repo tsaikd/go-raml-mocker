@@ -5,30 +5,34 @@ import (
 	"path"
 
 	"github.com/codegangsta/cli"
-	"github.com/tsaikd/go-raml-mocker/cmd"
+	"github.com/tsaikd/KDGoLib/cliutil/cmder"
 	"github.com/tsaikd/go-raml-parser/parser"
 	"github.com/tsaikd/go-raml-parser/parser/parserConfig"
 )
 
 func init() {
-	cmd.Flags = append(cmd.Flags, cli.StringFlag{
-		Name:        "f, ramlfile",
-		Value:       "api.raml",
-		Usage:       "Source RAML file",
-		Destination: &ramlFile,
-	})
-	cmd.Flags = append(cmd.Flags, cli.BoolFlag{
-		Name:        "checkRAMLVersion",
-		Usage:       "Check RAML Version",
-		Destination: &checkRAMLVersion,
-	})
-	cmd.Flags = append(cmd.Flags, cli.IntFlag{
-		Name:        "port",
-		Value:       4000,
-		Usage:       "Mock server listen port",
-		Destination: &port,
-	})
-	cmd.Action = action
+	cmder.Name = "ramlMocker"
+	cmder.Usage = "Go RAML mock web server"
+	cmder.Flags = append(cmder.Flags,
+		cli.StringFlag{
+			Name:        "f, ramlfile",
+			Value:       "api.raml",
+			Usage:       "Source RAML file",
+			Destination: &ramlFile,
+		},
+		cli.BoolFlag{
+			Name:        "checkRAMLVersion",
+			Usage:       "Check RAML Version",
+			Destination: &checkRAMLVersion,
+		},
+		cli.IntFlag{
+			Name:        "port",
+			Value:       4000,
+			Usage:       "Mock server listen port",
+			Destination: &port,
+		},
+	)
+	cmder.Action = action
 }
 
 var ramlFile string
