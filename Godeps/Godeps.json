@@ -3,10 +3,6 @@
 	"GoVersion": "go1.6",
 	"Deps": [
 		{
-			"ImportPath": "github.com/advance512/yaml",
-			"Rev": "e401b2b026855a4fa8e7014d553ae5bdfccb21cd"
-		},
-		{
 			"ImportPath": "github.com/tsaikd/KDGoLib",
 			"Rev": "443a5595b685fe588255bc1ef0c0a2e061e0fc53"
 		},
@@ -16,7 +12,7 @@
 		},
 		{
 			"ImportPath": "github.com/tsaikd/go-raml-parser",
-			"Rev": "04bfdffccc80c9aca02b4056b9474df7bea36967"
+			"Rev": "6b07eb7491e9e3e95b8c49b65eb679a3274c5c9f"
 		}
 	]
 }

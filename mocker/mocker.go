@@ -3,6 +3,7 @@ package mocker
 import (
 	"encoding/json"
 	"regexp"
+	"strings"
 
 	"github.com/tsaikd/KDGoLib/errutil"
 	"github.com/tsaikd/gin"
@@ -57,9 +58,11 @@ func bindRootDocument(router gin.IRouter, rootdoc parser.RootDocument) {
 	for ramlPath, resource := range rootdoc.Resources {
 		ginPath := regParam.ReplaceAllString(ramlPath, ":$1")
 
-		for code, response := range resource.Get.Responses {
-			for mimetype, body := range response.Bodies.ForMIMEType {
-				bindRoute(router, "GET", ginPath, int(code), mimetype, *body)
+		for name, method := range resource.Methods {
+			for code, response := range method.Responses {
+				for mimetype, body := range response.Bodies.ForMIMEType {
+					bindRoute(router, strings.ToUpper(name), ginPath, int(code), mimetype, *body)
+				}
 			}
 		}
 	}
