@@ -2,6 +2,7 @@ package mocker
 
 import (
 	"encoding/json"
+	"net/http"
 	"regexp"
 	"strings"
 
@@ -13,6 +14,7 @@ import (
 // errors
 var (
 	ErrorUnsupportedMIMEType1 = errutil.NewFactory("unsupported MIME type: %q")
+	ErrorHeaderRequired1      = errutil.NewFactory("header %q required")
 )
 
 var router *gin.Engine
@@ -35,10 +37,24 @@ func start(rootdoc parser.RootDocument, addr string) (err error) {
 	return router.Run(addr)
 }
 
-func bindRoute(router gin.IRouter, method string, path string, code int, mimetype string, body parser.Body) {
+func bindRoute(router gin.IRouter, method string, path string, code int, mimetype string, body parser.Body, istraits ...parser.IsTraits) {
 	switch mimetype {
 	case "application/json":
 		router.Handle(method, path, func(c *gin.Context) {
+			for _, istrait := range istraits {
+				for _, trait := range istrait {
+					for name, header := range trait.Headers {
+						if header.Required {
+							reqHeader := c.Request.Header.Get(name)
+							if reqHeader == "" {
+								c.AbortWithError(http.StatusBadRequest, ErrorHeaderRequired1.New(nil, name))
+								return
+							}
+						}
+					}
+				}
+			}
+
 			if !body.Examples.IsEmpty() {
 				for _, example := range body.Examples {
 					outputJSON(c, code, example.Value)
@@ -61,7 +77,7 @@ func bindRootDocument(router gin.IRouter, rootdoc parser.RootDocument) {
 		for name, method := range resource.Methods {
 			for code, response := range method.Responses {
 				for mimetype, body := range response.Bodies.ForMIMEType {
-					bindRoute(router, strings.ToUpper(name), ginPath, int(code), mimetype, *body)
+					bindRoute(router, strings.ToUpper(name), ginPath, int(code), mimetype, *body, resource.Is, method.Is)
 				}
 			}
 		}
