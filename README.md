@@ -1,7 +1,6 @@
-# go-raml-mocker
-RAML (1.0) web mock server implementation in golang
+# go-raml-mocker [![Build Status](https://travis-ci.org/tsaikd/go-raml-mocker.svg?branch=master)](https://travis-ci.org/tsaikd/go-raml-mocker) [![Report card](https://goreportcard.com/badge/github.com/tsaikd/go-raml-mocker)](https://goreportcard.com/report/github.com/tsaikd/go-raml-mocker)
 
-[![Build Status](https://travis-ci.org/tsaikd/go-raml-mocker.svg?branch=master)](https://travis-ci.org/tsaikd/go-raml-mocker)
+RAML (1.0) web mock server implementation in golang
 
 ## Features
 
