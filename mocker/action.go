@@ -58,7 +58,7 @@ func reload() (err error) {
 	}
 
 	addr := fmt.Sprintf(":%d", port)
-	if err = start(rootdoc, addr); err != nil {
+	if err = engineFromRootDocument(rootdoc).Run(addr); err != nil {
 		return
 	}
 
