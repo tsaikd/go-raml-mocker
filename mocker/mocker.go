@@ -22,21 +22,18 @@ const (
 	mimeTypeJSON = "application/json"
 )
 
-// used for reset routes
-var router *gin.Engine
-
-func engineFromRootDocument(rootdoc parser.RootDocument) *gin.Engine {
+func engineFromRootDocument(prevEngine *gin.Engine, rootdoc parser.RootDocument) *gin.Engine {
 	if _, err := json.Marshal(rootdoc); err != nil {
 		errutil.Trace(err)
 	}
 
-	if router != nil {
-		router.ResetRoutes()
-		bindRootDocument(router, rootdoc)
-		return router
+	if prevEngine != nil {
+		prevEngine.ResetRoutes()
+		bindRootDocument(prevEngine, rootdoc)
+		return prevEngine
 	}
 
-	router = gin.Default()
+	router := gin.Default()
 	router.Use(gin.ErrorLogger())
 	bindRootDocument(router, rootdoc)
 	return router

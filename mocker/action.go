@@ -6,6 +6,7 @@ import (
 
 	"github.com/codegangsta/cli"
 	"github.com/tsaikd/KDGoLib/cliutil/cmder"
+	"github.com/tsaikd/gin"
 	"github.com/tsaikd/go-raml-parser/parser"
 	"github.com/tsaikd/go-raml-parser/parser/parserConfig"
 )
@@ -39,6 +40,9 @@ var ramlFile string
 var checkRAMLVersion bool
 var port int
 
+// used for reset routes
+var router *gin.Engine
+
 func action(c *cli.Context) (err error) {
 	dir, _ := path.Split(ramlFile)
 	watch(dir)
@@ -57,9 +61,14 @@ func reload() (err error) {
 		return
 	}
 
-	addr := fmt.Sprintf(":%d", port)
-	if err = engineFromRootDocument(rootdoc).Run(addr); err != nil {
-		return
+	if router == nil {
+		addr := fmt.Sprintf(":%d", port)
+		router = engineFromRootDocument(router, rootdoc)
+		if err = router.Run(addr); err != nil {
+			return
+		}
+	} else {
+		router = engineFromRootDocument(router, rootdoc)
 	}
 
 	return

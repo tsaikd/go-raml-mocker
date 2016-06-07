@@ -27,7 +27,7 @@ func Test_MockServer(t *testing.T) {
 	rootdoc, err := ramlParser.ParseFile("../example/organisation-api.raml")
 	require.NoError(err)
 
-	ts := httptest.NewServer(engineFromRootDocument(rootdoc))
+	ts := httptest.NewServer(engineFromRootDocument(nil, rootdoc))
 	defer ts.Close()
 	require.NotNil(ts)
 
