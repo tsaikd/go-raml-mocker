@@ -6,6 +6,7 @@ import (
 
 	"github.com/codegangsta/cli"
 	"github.com/tsaikd/KDGoLib/cliutil/cmder"
+	"github.com/tsaikd/KDGoLib/futil"
 	"github.com/tsaikd/gin"
 	"github.com/tsaikd/go-raml-parser/parser"
 	"github.com/tsaikd/go-raml-parser/parser/parserConfig"
@@ -44,8 +45,12 @@ var port int
 var router *gin.Engine
 
 func action(c *cli.Context) (err error) {
-	dir, _ := path.Split(ramlFile)
-	watch(dir)
+	if futil.IsDir(ramlFile) {
+		watch(ramlFile)
+	} else {
+		dir, _ := path.Split(ramlFile)
+		watch(dir)
+	}
 	return reload()
 }
 
