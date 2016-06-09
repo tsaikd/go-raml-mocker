@@ -20,6 +20,10 @@ var (
 
 const (
 	mimeTypeJSON = "application/json"
+	mimeTypeBMP  = "image/bmp"
+	mimeTypeGIF  = "image/gif"
+	mimeTypeJPEG = "image/jpeg"
+	mimeTypePNG  = "image/png"
 )
 
 func engineFromRootDocument(prevEngine *gin.Engine, rootdoc parser.RootDocument) *gin.Engine {
@@ -125,53 +129,60 @@ func bindRoute(
 	responseBody parser.Body,
 	istraits ...parser.IsTraits,
 ) {
+	var outputFunc func(c *gin.Context, code int, data interface{})
+
 	switch mimetype {
 	case mimeTypeJSON:
-		router.Handle(methodName, path, func(c *gin.Context) {
-			for headerName, header := range method.Headers {
-				if err := checkHeader(c.Request, headerName, *header); err != nil {
-					c.AbortWithError(http.StatusBadRequest, err)
-					return
-				}
-			}
-
-			requestBody := map[string]interface{}{}
-			if methodBody, exist := method.Bodies[mimetype]; exist {
-				if err := c.Bind(&requestBody); err != nil {
-					c.AbortWithError(http.StatusBadRequest, err)
-					return
-				}
-				if err := checkValueType(
-					methodBody.APIType,
-					requestBody,
-					parser.CheckValueOptionAllowIntegerToBeNumber(true),
-				); err != nil {
-					c.AbortWithError(http.StatusBadRequest, err)
-					return
-				}
-			}
-
-			for _, istrait := range istraits {
-				for _, trait := range istrait {
-					if err := checkTrait(*trait, c, requestBody); err != nil {
-						c.AbortWithError(http.StatusBadRequest, err)
-						return
-					}
-				}
-			}
-
-			if !responseBody.Examples.IsEmpty() {
-				for _, example := range responseBody.Examples {
-					outputJSON(c, code, example.Value)
-					return
-				}
-			}
-
-			outputJSON(c, code, responseBody.Example.Value)
-		})
+		outputFunc = outputJSON
+	case mimeTypeBMP, mimeTypeGIF, mimeTypeJPEG, mimeTypePNG:
+		outputFunc = outputData
 	default:
 		errutil.Trace(ErrorUnsupportedMIMEType1.New(nil, mimetype))
+		return
 	}
+
+	router.Handle(methodName, path, func(c *gin.Context) {
+		for headerName, header := range method.Headers {
+			if err := checkHeader(c.Request, headerName, *header); err != nil {
+				c.AbortWithError(http.StatusBadRequest, err)
+				return
+			}
+		}
+
+		requestBody := map[string]interface{}{}
+		if methodBody, exist := method.Bodies[mimetype]; exist {
+			if err := c.Bind(&requestBody); err != nil {
+				c.AbortWithError(http.StatusBadRequest, err)
+				return
+			}
+			if err := checkValueType(
+				methodBody.APIType,
+				requestBody,
+				parser.CheckValueOptionAllowIntegerToBeNumber(true),
+			); err != nil {
+				c.AbortWithError(http.StatusBadRequest, err)
+				return
+			}
+		}
+
+		for _, istrait := range istraits {
+			for _, trait := range istrait {
+				if err := checkTrait(*trait, c, requestBody); err != nil {
+					c.AbortWithError(http.StatusBadRequest, err)
+					return
+				}
+			}
+		}
+
+		if !responseBody.Examples.IsEmpty() {
+			for _, example := range responseBody.Examples {
+				outputFunc(c, code, example.Value)
+				return
+			}
+		}
+
+		outputFunc(c, code, responseBody.Example.Value)
+	})
 }
 
 func bindDefaultResponse(
