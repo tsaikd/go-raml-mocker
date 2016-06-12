@@ -4,38 +4,38 @@ import (
 	"fmt"
 	"path"
 
-	"github.com/codegangsta/cli"
 	"github.com/tsaikd/KDGoLib/cliutil/cmder"
 	"github.com/tsaikd/KDGoLib/futil"
 	"github.com/tsaikd/gin"
 	"github.com/tsaikd/go-raml-parser/parser"
 	"github.com/tsaikd/go-raml-parser/parser/parserConfig"
+	"gopkg.in/urfave/cli.v2"
 )
 
-func init() {
-	cmder.Name = "ramlMocker"
-	cmder.Usage = "Go RAML mock web server"
-	cmder.Flags = append(cmder.Flags,
-		cli.StringFlag{
-			Name:        "f, ramlfile",
+// Module info
+var Module = cmder.NewModule("ramlMocker").
+	SetUsage("Go RAML mock web server").
+	AddFlag(
+		&cli.StringFlag{
+			Name:        "f",
+			Aliases:     []string{"ramlfile"},
 			Value:       "api.raml",
 			Usage:       "Source RAML file",
 			Destination: &ramlFile,
 		},
-		cli.BoolFlag{
+		&cli.BoolFlag{
 			Name:        "checkRAMLVersion",
 			Usage:       "Check RAML Version",
 			Destination: &checkRAMLVersion,
 		},
-		cli.IntFlag{
+		&cli.IntFlag{
 			Name:        "port",
 			Value:       4000,
 			Usage:       "Mock server listen port",
 			Destination: &port,
 		},
-	)
-	cmder.Action = action
-}
+	).
+	SetAction(action)
 
 var ramlFile string
 var checkRAMLVersion bool
