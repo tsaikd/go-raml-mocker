@@ -41,6 +41,10 @@ var ramlFile string
 var checkRAMLVersion bool
 var port int
 
+var checkValueOptions = []parser.CheckValueOption{
+	parser.CheckValueOptionAllowIntegerToBeNumber(true),
+}
+
 // used for reset routes
 var router *gin.Engine
 
@@ -55,13 +59,16 @@ func action(c *cli.Context) (err error) {
 }
 
 func reload() (err error) {
-	parser := parser.NewParser()
+	ramlParser := parser.NewParser()
 
-	if err = parser.Config(parserConfig.CheckRAMLVersion, checkRAMLVersion); err != nil {
+	if err = ramlParser.Config(parserConfig.CheckRAMLVersion, checkRAMLVersion); err != nil {
+		return
+	}
+	if err = ramlParser.Config(parserConfig.CheckValueOptions, checkValueOptions); err != nil {
 		return
 	}
 
-	rootdoc, err := parser.ParseFile(ramlFile)
+	rootdoc, err := ramlParser.ParseFile(ramlFile)
 	if err != nil {
 		return
 	}

@@ -43,23 +43,23 @@ func engineFromRootDocument(prevEngine *gin.Engine, rootdoc parser.RootDocument)
 	return router
 }
 
-func checkValueType(apiType parser.APIType, ivalue interface{}, options ...parser.CheckValueOption) error {
+func checkValueType(apiType parser.APIType, ivalue interface{}) error {
 	value, err := parser.NewValue(ivalue)
 	if err != nil {
 		return err
 	}
-	if err = parser.CheckValueAPIType(apiType, value, options...); err != nil {
+	if err = parser.CheckValueAPIType(apiType, value, checkValueOptions...); err != nil {
 		return err
 	}
 	return nil
 }
 
-func checkHeader(req *http.Request, headerName string, header parser.Header, options ...parser.CheckValueOption) error {
+func checkHeader(req *http.Request, headerName string, header parser.Header) error {
 	headerValue := req.Header.Get(headerName)
 	if header.Required && headerValue == "" {
 		return ErrorHeaderRequired1.New(nil, headerName)
 	}
-	if err := checkValueType(header.APIType, headerValue, options...); err != nil {
+	if err := checkValueType(header.APIType, headerValue); err != nil {
 		return err
 	}
 	return nil
@@ -77,11 +77,7 @@ func checkTrait(trait parser.Trait, c *gin.Context, requestBody map[string]inter
 		if qp.Required && param.IsEmpty() {
 			return ErrorQueryParameterRequired1.New(nil, name)
 		}
-		if err := checkValueType(
-			qp.APIType,
-			param,
-			parser.CheckValueOptionAllowIntegerToBeNumber(true),
-		); err != nil {
+		if err := checkValueType(qp.APIType, param); err != nil {
 			return err
 		}
 	}
@@ -155,11 +151,7 @@ func bindRoute(
 				c.AbortWithError(http.StatusBadRequest, err)
 				return
 			}
-			if err := checkValueType(
-				methodBody.APIType,
-				requestBody,
-				parser.CheckValueOptionAllowIntegerToBeNumber(true),
-			); err != nil {
+			if err := checkValueType(methodBody.APIType, requestBody); err != nil {
 				c.AbortWithError(http.StatusBadRequest, err)
 				return
 			}
