@@ -34,12 +34,18 @@ var Module = cmder.NewModule("ramlMocker").
 			Usage:       "Mock server listen port",
 			Destination: &port,
 		},
+		&cli.StringFlag{
+			Name:        "proxy",
+			Usage:       "Proxy for mock request to original server, used when only mock some of APIs in RAML, keep empty to disable, e.g. http://origin.backend.addr:port",
+			Destination: &proxy,
+		},
 	).
 	SetAction(action)
 
 var ramlFile string
 var checkRAMLVersion bool
 var port int
+var proxy string
 
 var checkValueOptions = []parser.CheckValueOption{
 	parser.CheckValueOptionAllowIntegerToBeNumber(true),

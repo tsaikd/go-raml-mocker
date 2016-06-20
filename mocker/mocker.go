@@ -2,6 +2,7 @@ package mocker
 
 import (
 	"encoding/json"
+	"io/ioutil"
 	"net/http"
 	"regexp"
 	"strings"
@@ -40,7 +41,41 @@ func engineFromRootDocument(prevEngine *gin.Engine, rootdoc parser.RootDocument)
 	router := gin.Default()
 	router.Use(gin.ErrorLogger())
 	bindRootDocument(router, rootdoc)
+	router.NoRoute(proxyRoute)
+	router.NoMethod(proxyRoute)
 	return router
+}
+
+func proxyRoute(c *gin.Context) {
+	if proxy == "" {
+		return
+	}
+
+	logger.Debugf("Proxy to: %s %s", c.Request.Method, proxy+c.Request.RequestURI)
+
+	client := http.Client{}
+
+	req, err := http.NewRequest(c.Request.Method, proxy+c.Request.RequestURI, c.Request.Body)
+	if err != nil {
+		c.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+
+	resp, err := client.Do(req)
+	if err != nil {
+		c.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+	defer resp.Body.Close()
+
+	code := resp.StatusCode
+	contentType := resp.Header.Get("Content-Type")
+	data, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		c.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+	c.Data(code, contentType, data)
 }
 
 func checkValueType(apiType parser.APIType, ivalue interface{}) error {
