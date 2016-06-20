@@ -24,12 +24,14 @@ docker run \
 curl http://localhost:4000/organisation
 ```
 
-## Use golang binary from github source code
+## Use pre-build binary (Linux x86_64)
 
-### Install
+### Download from gihub
+
+* See [release](https://github.com/tsaikd/go-raml-mocker/releases) for all available versions
 
 ```
-go get -u -v "github.com/tsaikd/go-raml-mocker"
+curl 'https://github.com/tsaikd/go-raml-mocker/releases/download/1.0.2/go-raml-mocker-Linux-x86_64' -SLo go-raml-mocker && chmod +x go-raml-mocker
 ```
 
 ### Usage
@@ -45,4 +47,16 @@ go-raml-mocker -f example/organisation-api.raml --port 4000
 
 ```
 curl http://localhost:4000/organisation
+```
+
+## Use golang binary from github source code
+
+```
+go get -u -v "github.com/tsaikd/go-raml-mocker"
+```
+
+### Show all configuration
+
+```
+go-raml-mocker -h
 ```
