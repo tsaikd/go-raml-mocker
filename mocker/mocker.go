@@ -61,6 +61,8 @@ func proxyRoute(c *gin.Context) {
 		return
 	}
 
+	req.Header = c.Request.Header
+
 	resp, err := client.Do(req)
 	if err != nil {
 		c.AbortWithError(http.StatusBadRequest, err)
@@ -75,6 +77,13 @@ func proxyRoute(c *gin.Context) {
 		c.AbortWithError(http.StatusBadRequest, err)
 		return
 	}
+	outputHeader := c.Writer.Header()
+	for name, headers := range resp.Header {
+		for _, header := range headers {
+			outputHeader.Add(name, header)
+		}
+	}
+	c.Header("Access-Control-Allow-Origin", "*")
 	c.Data(code, contentType, data)
 }
 
@@ -173,6 +182,8 @@ func bindRoute(
 	}
 
 	router.Handle(methodName, path, func(c *gin.Context) {
+		c.Header("Access-Control-Allow-Origin", "*")
+
 		for headerName, header := range method.Headers {
 			if err := checkHeader(c.Request, headerName, *header); err != nil {
 				c.AbortWithError(http.StatusBadRequest, err)
@@ -252,5 +263,20 @@ func bindRootDocument(router gin.IRouter, rootdoc parser.RootDocument) {
 				}
 			}
 		}
+	}
+
+	if proxy != "" {
+		router.OPTIONS("/*path", func(c *gin.Context) {
+			if value := c.Request.Header.Get("Access-Control-Request-Method"); value != "" {
+				c.Header("Access-Control-Allow-Methods", value)
+			}
+
+			if value := c.Request.Header.Get("Access-Control-Request-Headers"); value != "" {
+				c.Header("Access-Control-Allow-Headers", value)
+			}
+
+			c.Header("Access-Control-Allow-Origin", "*")
+			c.Status(http.StatusOK)
+		})
 	}
 }
