@@ -24,6 +24,14 @@ docker run \
 curl http://localhost:4000/organisation
 ```
 
+```
+curl http://localhost:4000/organisation \
+	-XPOST \
+	--header "UserID: SWED-123" \
+	--header "Content-Type: application/json" \
+	-d '{"name":"Bob"}'
+```
+
 ## Use pre-build binary (Linux x86_64)
 
 ### Download from gihub
