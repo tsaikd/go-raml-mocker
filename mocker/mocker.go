@@ -7,6 +7,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/gorilla/websocket"
 	"github.com/tsaikd/KDGoLib/errutil"
 	"github.com/tsaikd/gin"
 	"github.com/tsaikd/go-raml-parser/parser"
@@ -17,6 +18,9 @@ var (
 	ErrorUnsupportedMIMEType1    = errutil.NewFactory("unsupported MIME type: %q")
 	ErrorHeaderRequired1         = errutil.NewFactory("header %q required")
 	ErrorQueryParameterRequired1 = errutil.NewFactory("query parameter %q required")
+	ErrorWSDialFailed            = errutil.NewFactory("websocket dial failed")
+	ErrorWSUpgrdaeFailed         = errutil.NewFactory("websocket upgrade failed")
+	ErrorWSIOFailed              = errutil.NewFactory("websocket IO failed")
 )
 
 const (
@@ -53,6 +57,14 @@ func proxyRoute(c *gin.Context) {
 
 	logger.Debugf("Proxy to: %s %s", c.Request.Method, proxy+c.Request.RequestURI)
 
+	if c.Request.Header.Get("Upgrade") == "websocket" {
+		if err := proxyWebSocket(c); err != nil {
+			logger.Debugln(err)
+			return
+		}
+		return
+	}
+
 	client := http.Client{}
 
 	req, err := http.NewRequest(c.Request.Method, proxy+c.Request.RequestURI, c.Request.Body)
@@ -85,6 +97,70 @@ func proxyRoute(c *gin.Context) {
 	}
 	c.Header("Access-Control-Allow-Origin", "*")
 	c.Data(code, contentType, data)
+}
+
+func proxyWebSocket(c *gin.Context) (err error) {
+	regexpProto := regexp.MustCompile(`^http`)
+	origin := c.Request.Header.Get("Origin")
+	wsurl := regexpProto.ReplaceAllString(proxy+c.Request.RequestURI, "ws")
+	header := http.Header{}
+	header.Set("Origin", origin)
+	wssrc, _, err := websocket.DefaultDialer.Dial(wsurl, header)
+	if err != nil {
+		return ErrorWSDialFailed.New(err)
+	}
+
+	upgrader := websocket.Upgrader{
+		CheckOrigin: func(r *http.Request) bool { return true },
+	}
+	wsdst, err := upgrader.Upgrade(c.Writer, c.Request, nil)
+	if err != nil {
+		return ErrorWSUpgrdaeFailed.New(err)
+	}
+
+	copyfn := func(dst *websocket.Conn, src *websocket.Conn) (err error) {
+		srcType, srcData, err := src.ReadMessage()
+		if err != nil {
+			return err
+		}
+		if err = dst.WriteMessage(srcType, srcData); err != nil {
+			return err
+		}
+		return nil
+	}
+
+	errorchan := make(chan error)
+
+	go func() {
+		for {
+			if err = copyfn(wssrc, wsdst); err != nil {
+				errorchan <- err
+				return
+			}
+		}
+	}()
+	go func() {
+		for {
+			if err = copyfn(wsdst, wssrc); err != nil {
+				errorchan <- err
+				return
+			}
+		}
+	}()
+
+	err = <-errorchan
+	if err != nil {
+		switch err.(type) {
+		case *websocket.CloseError:
+			closeError := err.(*websocket.CloseError)
+			switch closeError.Code {
+			case websocket.CloseGoingAway:
+				return nil
+			}
+		}
+		return ErrorWSIOFailed.New(err)
+	}
+	return nil
 }
 
 func checkValueType(apiType parser.APIType, ivalue interface{}) error {
