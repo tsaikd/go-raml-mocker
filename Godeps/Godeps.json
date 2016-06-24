@@ -4,7 +4,7 @@
 	"Deps": [
 		{
 			"ImportPath": "github.com/tsaikd/KDGoLib",
-			"Rev": "664f9f258d69f89252e72c69e92b3b6895b39951"
+			"Rev": "e280cfa79367a0c3f57b003305e675fc9ac6c220"
 		},
 		{
 			"ImportPath": "github.com/tsaikd/gin",
@@ -12,7 +12,7 @@
 		},
 		{
 			"ImportPath": "github.com/tsaikd/go-raml-parser",
-			"Rev": "6b40a372da717e070d502d74449a71dcf68e5635"
+			"Rev": "c6e195c4f042d98c690e82594a8bc22e04f93be5"
 		}
 	]
 }
