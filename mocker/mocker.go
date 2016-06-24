@@ -2,6 +2,7 @@ package mocker
 
 import (
 	"encoding/json"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"regexp"
@@ -18,6 +19,7 @@ var (
 	ErrorUnsupportedMIMEType1    = errutil.NewFactory("unsupported MIME type: %q")
 	ErrorHeaderRequired1         = errutil.NewFactory("header %q required")
 	ErrorQueryParameterRequired1 = errutil.NewFactory("query parameter %q required")
+	ErrorBindFailed              = errutil.NewFactory("bind request body failed")
 	ErrorWSDialFailed            = errutil.NewFactory("websocket dial failed")
 	ErrorWSUpgrdaeFailed         = errutil.NewFactory("websocket upgrade failed")
 	ErrorWSIOFailed              = errutil.NewFactory("websocket IO failed")
@@ -270,8 +272,10 @@ func bindRoute(
 		requestBody := map[string]interface{}{}
 		if methodBody, exist := method.Bodies[mimetype]; exist {
 			if err := c.Bind(&requestBody); err != nil {
-				c.AbortWithError(http.StatusBadRequest, err)
-				return
+				if err != io.EOF {
+					c.AbortWithError(http.StatusBadRequest, ErrorBindFailed.New(err))
+					return
+				}
 			}
 			if err := checkValueType(methodBody.APIType, requestBody); err != nil {
 				c.AbortWithError(http.StatusBadRequest, err)
