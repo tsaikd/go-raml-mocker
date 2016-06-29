@@ -1,0 +1,13 @@
+#%RAML 1.0
+title: Send array types
+
+/send:
+    post:
+        body:
+            application/json:
+                type: object
+                properties:
+                    bools: boolean[]
+                    ints:  integer[]
+                    nums:  number[]
+                    strs:  string[]
