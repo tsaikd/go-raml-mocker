@@ -176,7 +176,8 @@ func checkValueType(apiType parser.APIType, ivalue interface{}) error {
 	return nil
 }
 
-func checkHeader(req *http.Request, headerName string, header parser.Header) error {
+func checkHeader(req *http.Request, header parser.Property) error {
+	headerName := header.Name
 	headerValue := req.Header.Get(headerName)
 	if header.Required && headerValue == "" {
 		return ErrorHeaderRequired1.New(nil, headerName)
@@ -188,13 +189,14 @@ func checkHeader(req *http.Request, headerName string, header parser.Header) err
 }
 
 func checkTrait(trait parser.Trait, c *gin.Context, requestBody map[string]interface{}) error {
-	for headerName, header := range trait.Headers {
-		if err := checkHeader(c.Request, headerName, *header); err != nil {
+	for _, header := range trait.Headers.Slice() {
+		if err := checkHeader(c.Request, *header); err != nil {
 			return err
 		}
 	}
 
-	for name, qp := range trait.QueryParameters {
+	for _, qp := range trait.QueryParameters.Slice() {
+		name := qp.Name
 		param := getParam(c, name, requestBody)
 		if qp.Required && param.IsEmpty() {
 			return ErrorQueryParameterRequired1.New(nil, name)
@@ -262,8 +264,8 @@ func bindRoute(
 	router.Handle(methodName, path, func(c *gin.Context) {
 		c.Header("Access-Control-Allow-Origin", "*")
 
-		for headerName, header := range method.Headers {
-			if err := checkHeader(c.Request, headerName, *header); err != nil {
+		for _, header := range method.Headers.Slice() {
+			if err := checkHeader(c.Request, *header); err != nil {
 				c.AbortWithError(http.StatusBadRequest, err)
 				return
 			}
