@@ -321,6 +321,9 @@ func bindDefaultResponse(
 func bindRootDocument(router gin.IRouter, rootdoc parser.RootDocument) {
 	regParam := regexp.MustCompile(`{(\w+)}`)
 	for ramlPath, resource := range rootdoc.Resources {
+		if !isNeedToBindResource(ramlPath) {
+			continue
+		}
 		ginPath := regParam.ReplaceAllString(ramlPath, ":$1")
 
 		for name, method := range resource.Methods {
@@ -361,4 +364,11 @@ func bindRootDocument(router gin.IRouter, rootdoc parser.RootDocument) {
 			c.Status(http.StatusOK)
 		})
 	}
+}
+
+func isNeedToBindResource(resourcePath string) bool {
+	if len(config.Resources) < 1 {
+		return true
+	}
+	return config.Resources[resourcePath]
 }

@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"strings"
+
 	"github.com/spf13/cobra"
 	"github.com/tsaikd/KDGoLib/cliutil/cobrather"
 	"github.com/tsaikd/go-raml-mocker/mocker"
@@ -27,17 +29,30 @@ var (
 		Name:  "proxy",
 		Usage: "Proxy for mock request to original server, used when only mock some of APIs in RAML, keep empty to disable, e.g. http://origin.backend.addr:port",
 	}
+	flagResources = &cobrather.StringSliceFlag{
+		Name:      "resource",
+		ShortHand: "r",
+		Usage:     "Mock resources, keep empty to mock all found resources",
+	}
 )
 
 // Module info
 var Module = &cobrather.Module{
 	Use:   "go-raml-mocker",
 	Short: "RAML mock web server written in Go",
+	Example: strings.TrimSpace(`
+go-raml-mocker --ramlfile "api.raml" --proxy "https://backend.example.com"
+go-raml-mocker --ramlfile "./raml/directory/path" --proxy "https://backend.example.com" --resources "/mock/resource1" --resources "/mock/resource2"
+	`),
+	Commands: []*cobrather.Module{
+		cobrather.VersionModule,
+	},
 	Flags: []cobrather.Flag{
 		flagFile,
 		flagCheckRAMLVersion,
 		flagPort,
 		flagProxy,
+		flagResources,
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return mocker.Start(mocker.Config{
@@ -45,6 +60,7 @@ var Module = &cobrather.Module{
 			CheckRAMLVersion: flagCheckRAMLVersion.Bool(),
 			Port:             flagPort.Int64(),
 			Proxy:            flagProxy.String(),
+			Resources:        mocker.BuildResourcesMap(flagResources.StringSlice()),
 		})
 	},
 }

@@ -3,6 +3,7 @@ package mocker
 import (
 	"fmt"
 	"path"
+	"regexp"
 
 	"github.com/tsaikd/KDGoLib/futil"
 	"github.com/tsaikd/gin"
@@ -16,6 +17,22 @@ type Config struct {
 	CheckRAMLVersion bool
 	Port             int64
 	Proxy            string
+	Resources        map[string]bool
+}
+
+// BuildResourcesMap return resource map by resources string slice
+func BuildResourcesMap(resources []string) map[string]bool {
+	resmap := map[string]bool{}
+	regRAMLParam := regexp.MustCompile(`{(\w+)}`)
+	regGinParam := regexp.MustCompile(`:(\w+)`)
+	for _, respath := range resources {
+		resmap[respath] = true
+		ramlpath := regGinParam.ReplaceAllString(respath, "{$1}")
+		resmap[ramlpath] = true
+		ginpath := regRAMLParam.ReplaceAllString(respath, ":$1")
+		resmap[ginpath] = true
+	}
+	return resmap
 }
 
 var config = &Config{}
