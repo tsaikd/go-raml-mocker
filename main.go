@@ -1,12 +1,15 @@
 package main
 
 import (
-	"github.com/tsaikd/KDGoLib/cliutil/cmder"
-	"github.com/tsaikd/go-raml-mocker/mocker"
+	"os"
+
+	"github.com/tsaikd/go-raml-mocker/cmd"
 )
 
 func main() {
-	cmder.Main(
-		*mocker.Module,
-	)
+	rootCommand := cmd.Module.MustNewRootCommand(nil)
+	rootCommand.SilenceUsage = true
+	if err := rootCommand.Execute(); err != nil {
+		os.Exit(-1)
+	}
 }

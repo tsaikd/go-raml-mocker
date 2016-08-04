@@ -53,11 +53,11 @@ func engineFromRootDocument(prevEngine *gin.Engine, rootdoc parser.RootDocument)
 }
 
 func proxyRoute(c *gin.Context) {
-	if proxy == "" {
+	if config.Proxy == "" {
 		return
 	}
 
-	logger.Debugf("Proxy to: %s %s", c.Request.Method, proxy+c.Request.RequestURI)
+	logger.Debugf("Proxy to: %s %s", c.Request.Method, config.Proxy+c.Request.RequestURI)
 
 	if c.Request.Header.Get("Upgrade") == "websocket" {
 		if err := proxyWebSocket(c); err != nil {
@@ -69,7 +69,7 @@ func proxyRoute(c *gin.Context) {
 
 	client := http.Client{}
 
-	req, err := http.NewRequest(c.Request.Method, proxy+c.Request.RequestURI, c.Request.Body)
+	req, err := http.NewRequest(c.Request.Method, config.Proxy+c.Request.RequestURI, c.Request.Body)
 	if err != nil {
 		c.AbortWithError(http.StatusBadRequest, err)
 		return
@@ -104,7 +104,7 @@ func proxyRoute(c *gin.Context) {
 func proxyWebSocket(c *gin.Context) (err error) {
 	regexpProto := regexp.MustCompile(`^http`)
 	origin := c.Request.Header.Get("Origin")
-	wsurl := regexpProto.ReplaceAllString(proxy+c.Request.RequestURI, "ws")
+	wsurl := regexpProto.ReplaceAllString(config.Proxy+c.Request.RequestURI, "ws")
 	header := http.Header{}
 	header.Set("Origin", origin)
 	wssrc, _, err := websocket.DefaultDialer.Dial(wsurl, header)
@@ -347,7 +347,7 @@ func bindRootDocument(router gin.IRouter, rootdoc parser.RootDocument) {
 		}
 	}
 
-	if proxy != "" {
+	if config.Proxy != "" {
 		router.OPTIONS("/*path", func(c *gin.Context) {
 			if value := c.Request.Header.Get("Access-Control-Request-Method"); value != "" {
 				c.Header("Access-Control-Allow-Methods", value)
