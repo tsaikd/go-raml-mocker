@@ -20,6 +20,10 @@ var (
 		Name:  "checkRAMLVersion",
 		Usage: "Check RAML Version",
 	}
+	flagCacheDir = &cobrather.StringFlag{
+		Name:  "cache",
+		Usage: "Cache parsed RAML file in cache directory",
+	}
 	flagPort = &cobrather.Int64Flag{
 		Name:    "port",
 		Default: 4000,
@@ -42,7 +46,7 @@ var Module = &cobrather.Module{
 	Short: "RAML mock web server written in Go",
 	Example: strings.TrimSpace(`
 go-raml-mocker --ramlfile "api.raml" --proxy "https://backend.example.com"
-go-raml-mocker --ramlfile "./raml/directory/path" --proxy "https://backend.example.com" --resources "/mock/resource1" --resources "/mock/resource2"
+go-raml-mocker --ramlfile "./raml/directory/path" --cache ".ramlcache" --proxy "https://backend.example.com" --resources "/mock/resource1" --resources "/mock/resource2"
 	`),
 	Commands: []*cobrather.Module{
 		cobrather.VersionModule,
@@ -50,6 +54,7 @@ go-raml-mocker --ramlfile "./raml/directory/path" --proxy "https://backend.examp
 	Flags: []cobrather.Flag{
 		flagFile,
 		flagCheckRAMLVersion,
+		flagCacheDir,
 		flagPort,
 		flagProxy,
 		flagResources,
@@ -58,6 +63,7 @@ go-raml-mocker --ramlfile "./raml/directory/path" --proxy "https://backend.examp
 		return mocker.Start(mocker.Config{
 			RAMLFile:         flagFile.String(),
 			CheckRAMLVersion: flagCheckRAMLVersion.Bool(),
+			CacheDir:         flagCacheDir.String(),
 			Port:             flagPort.Int64(),
 			Proxy:            flagProxy.String(),
 			Resources:        mocker.BuildResourcesMap(flagResources.StringSlice()),

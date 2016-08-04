@@ -15,6 +15,7 @@ import (
 type Config struct {
 	RAMLFile         string
 	CheckRAMLVersion bool
+	CacheDir         string
 	Port             int64
 	Proxy            string
 	Resources        map[string]bool
@@ -65,6 +66,9 @@ func reload() (err error) {
 		return
 	}
 	if err = ramlParser.Config(parserConfig.CheckValueOptions, checkValueOptions); err != nil {
+		return
+	}
+	if err = ramlParser.Config(parserConfig.CacheDirectory, config.CacheDir); err != nil {
 		return
 	}
 
