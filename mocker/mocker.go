@@ -20,6 +20,7 @@ var (
 	ErrorHeaderRequired1         = errutil.NewFactory("header %q required")
 	ErrorQueryParameterRequired1 = errutil.NewFactory("query parameter %q required")
 	ErrorBindFailed              = errutil.NewFactory("bind request body failed")
+	ErrorResourceNotFound1       = errutil.NewFactory("resource %q not found in RAML file")
 	ErrorWSDialFailed            = errutil.NewFactory("websocket dial failed")
 	ErrorWSUpgrdaeFailed         = errutil.NewFactory("websocket upgrade failed")
 	ErrorWSIOFailed              = errutil.NewFactory("websocket IO failed")
@@ -319,12 +320,11 @@ func bindDefaultResponse(
 }
 
 func bindRootDocument(router gin.IRouter, rootdoc parser.RootDocument) {
-	regParam := regexp.MustCompile(`{(\w+)}`)
 	for ramlPath, resource := range rootdoc.Resources {
 		if !isNeedToBindResource(ramlPath) {
 			continue
 		}
-		ginPath := regParam.ReplaceAllString(ramlPath, ":$1")
+		ginPath := toGinResource(ramlPath)
 
 		for name, method := range resource.Methods {
 			methodName := strings.ToUpper(name)

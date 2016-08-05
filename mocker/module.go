@@ -3,40 +3,12 @@ package mocker
 import (
 	"fmt"
 	"path"
-	"regexp"
 
 	"github.com/tsaikd/KDGoLib/futil"
 	"github.com/tsaikd/gin"
 	"github.com/tsaikd/go-raml-parser/parser"
 	"github.com/tsaikd/go-raml-parser/parser/parserConfig"
 )
-
-// Config for mock server
-type Config struct {
-	RAMLFile         string
-	CheckRAMLVersion bool
-	CacheDir         string
-	Port             int64
-	Proxy            string
-	Resources        map[string]bool
-}
-
-// BuildResourcesMap return resource map by resources string slice
-func BuildResourcesMap(resources []string) map[string]bool {
-	resmap := map[string]bool{}
-	regRAMLParam := regexp.MustCompile(`{(\w+)}`)
-	regGinParam := regexp.MustCompile(`:(\w+)`)
-	for _, respath := range resources {
-		resmap[respath] = true
-		ramlpath := regGinParam.ReplaceAllString(respath, "{$1}")
-		resmap[ramlpath] = true
-		ginpath := regRAMLParam.ReplaceAllString(respath, ":$1")
-		resmap[ginpath] = true
-	}
-	return resmap
-}
-
-var config = &Config{}
 
 // Start mock server
 func Start(conf Config) (err error) {
@@ -74,6 +46,10 @@ func reload() (err error) {
 
 	rootdoc, err := ramlParser.ParseFile(config.RAMLFile)
 	if err != nil {
+		return
+	}
+
+	if err = checkConfigResource(rootdoc.Resources); err != nil {
 		return
 	}
 
