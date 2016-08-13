@@ -120,35 +120,36 @@ func proxyWebSocket(c *gin.Context) (err error) {
 	if err != nil {
 		return ErrorWSUpgrdaeFailed.New(err)
 	}
+	defer wsdst.Close()
 
-	copyfn := func(dst *websocket.Conn, src *websocket.Conn) (err error) {
-		srcType, srcData, err := src.ReadMessage()
-		if err != nil {
-			return err
-		}
-		if err = dst.WriteMessage(srcType, srcData); err != nil {
-			return err
-		}
-		return nil
-	}
-
-	errorchan := make(chan error)
+	errorchan := make(chan error, 2)
+	done := make(chan bool, 2)
 
 	go func() {
+		defer func() {
+			done <- true
+		}()
 		for {
-			if err = copyfn(wssrc, wsdst); err != nil {
+			if err = copyWebSocketMessage(wssrc, wsdst); err != nil {
 				errorchan <- err
 				return
 			}
 		}
 	}()
 	go func() {
+		defer func() {
+			done <- true
+		}()
 		for {
-			if err = copyfn(wsdst, wssrc); err != nil {
+			if err = copyWebSocketMessage(wsdst, wssrc); err != nil {
 				errorchan <- err
 				return
 			}
 		}
+	}()
+	defer func() {
+		<-done
+		<-done
 	}()
 
 	err = <-errorchan
@@ -162,6 +163,17 @@ func proxyWebSocket(c *gin.Context) (err error) {
 			}
 		}
 		return ErrorWSIOFailed.New(err)
+	}
+	return nil
+}
+
+func copyWebSocketMessage(dst *websocket.Conn, src *websocket.Conn) (err error) {
+	srcType, srcData, err := src.ReadMessage()
+	if err != nil {
+		return err
+	}
+	if err = dst.WriteMessage(srcType, srcData); err != nil {
+		return err
 	}
 	return nil
 }
