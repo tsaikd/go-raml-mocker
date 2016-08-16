@@ -2,12 +2,13 @@ package mocker
 
 // Config for mock server
 type Config struct {
-	RAMLFile         string
-	CheckRAMLVersion bool
-	CacheDir         string
-	Port             int64
-	Proxy            string
-	Resources        map[string]bool
+	RAMLFile                       string
+	CheckRAMLVersion               bool
+	CacheDir                       string
+	Port                           int64
+	Proxy                          string
+	Resources                      map[string]bool
+	AllowRequiredPropertyToBeEmpty bool
 }
 
 // BuildResourcesMap return resource map by resources string slice

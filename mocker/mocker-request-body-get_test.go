@@ -106,4 +106,39 @@ func Test_MockServer_RequestBodyGet(t *testing.T) {
 		err = res.Body.Close()
 		require.NoError(err)
 	}()
+
+	func() {
+		backupOpts := checkValueOptions[:]
+		checkValueOptions = []parser.CheckValueOption{
+			parser.CheckValueOptionAllowIntegerToBeNumber(true),
+			parser.CheckValueOptionAllowRequiredPropertyToBeEmpty(true),
+		}
+		defer func() {
+			checkValueOptions = backupOpts[:]
+		}()
+
+		params := url.Values{
+			"bool":  []string{"true"},
+			"bools": []string{"false", "true"},
+			"int":   []string{"9527"},
+			"ints":  []string{"5566", "9527"},
+			"num":   []string{"3.14"},
+			"nums":  []string{"6.02", "3.14"},
+			"str":   []string{""},
+		}
+
+		requrl, err := url.Parse(ts.URL + "/query")
+		require.NoError(err)
+		requrl.RawQuery = params.Encode()
+
+		req, err := http.NewRequest("GET", requrl.String(), nil)
+		require.NoError(err)
+
+		res, err := client.Do(req)
+		require.NoError(err)
+		require.EqualValues(http.StatusOK, res.StatusCode)
+
+		err = res.Body.Close()
+		require.NoError(err)
+	}()
 }

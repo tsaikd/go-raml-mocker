@@ -38,6 +38,10 @@ var (
 		ShortHand: "r",
 		Usage:     "Mock resources, keep empty to mock all found resources",
 	}
+	flagAllowRequiredPropertyToBeEmpty = &cobrather.BoolFlag{
+		Name:  "allowRequiredPropertyToBeEmpty",
+		Usage: "allow required property to be empty value, but still should be existed",
+	}
 )
 
 // Module info
@@ -58,15 +62,17 @@ go-raml-mocker --ramlfile "./raml/directory/path" --cache ".ramlcache" --proxy "
 		flagPort,
 		flagProxy,
 		flagResources,
+		flagAllowRequiredPropertyToBeEmpty,
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return mocker.Start(mocker.Config{
-			RAMLFile:         flagFile.String(),
-			CheckRAMLVersion: flagCheckRAMLVersion.Bool(),
-			CacheDir:         flagCacheDir.String(),
-			Port:             flagPort.Int64(),
-			Proxy:            flagProxy.String(),
-			Resources:        mocker.BuildResourcesMap(flagResources.StringSlice()),
+			RAMLFile:                       flagFile.String(),
+			CheckRAMLVersion:               flagCheckRAMLVersion.Bool(),
+			CacheDir:                       flagCacheDir.String(),
+			Port:                           flagPort.Int64(),
+			Proxy:                          flagProxy.String(),
+			Resources:                      mocker.BuildResourcesMap(flagResources.StringSlice()),
+			AllowRequiredPropertyToBeEmpty: flagAllowRequiredPropertyToBeEmpty.Bool(),
 		})
 	},
 }

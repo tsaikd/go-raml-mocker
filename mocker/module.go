@@ -14,6 +14,11 @@ import (
 func Start(conf Config) (err error) {
 	config = &conf
 
+	checkValueOptions = []parser.CheckValueOption{
+		parser.CheckValueOptionAllowIntegerToBeNumber(true),
+		parser.CheckValueOptionAllowRequiredPropertyToBeEmpty(config.AllowRequiredPropertyToBeEmpty),
+	}
+
 	if futil.IsDir(config.RAMLFile) {
 		watch(config.RAMLFile)
 	} else {
