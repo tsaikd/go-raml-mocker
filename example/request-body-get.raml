@@ -1,0 +1,15 @@
+#%RAML 1.0
+/query:
+    get:
+        body:
+            application/json:
+                type: object
+                properties:
+                    bool:  boolean
+                    bools: boolean[]
+                    int:   integer
+                    ints:  integer[]
+                    num:   number
+                    nums:  number[]
+                    str:   string
+                    strs:  string[]

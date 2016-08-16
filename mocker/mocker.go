@@ -201,7 +201,7 @@ func checkHeader(req *http.Request, header parser.Property) error {
 	return nil
 }
 
-func checkTrait(trait parser.Trait, c *gin.Context, requestBody map[string]interface{}) error {
+func checkTrait(trait parser.Trait, c *gin.Context, requestBody parser.Value) error {
 	for _, header := range trait.Headers.Slice() {
 		if err := checkHeader(c.Request, *header); err != nil {
 			return err
@@ -228,7 +228,7 @@ func checkTrait(trait parser.Trait, c *gin.Context, requestBody map[string]inter
 	return nil
 }
 
-func getParam(c *gin.Context, name string, requestBody map[string]interface{}) parser.Value {
+func getParam(c *gin.Context, name string, requestBody parser.Value) parser.Value {
 	if param, exist := c.Params.Get(name); exist {
 		result, err := parser.NewValue(param)
 		errutil.Trace(err)
@@ -244,10 +244,8 @@ func getParam(c *gin.Context, name string, requestBody map[string]interface{}) p
 		errutil.Trace(err)
 		return result
 	}
-	if param, exist := requestBody[name]; exist {
-		result, err := parser.NewValue(param)
-		errutil.Trace(err)
-		return result
+	if param, exist := requestBody.Map[name]; exist && param != nil {
+		return *param
 	}
 	return parser.Value{}
 }
@@ -284,13 +282,12 @@ func bindRoute(
 			}
 		}
 
-		requestBody := map[string]interface{}{}
+		requestBody := parser.Value{}
 		if methodBody, exist := method.Bodies[mimetype]; exist {
-			if err := c.Bind(&requestBody); err != nil {
-				if err != io.EOF {
-					c.AbortWithError(http.StatusBadRequest, ErrorBindFailed.New(err))
-					return
-				}
+			var err error
+			if requestBody, err = parseRequestBody(c, methodBody.APIType); err != nil {
+				c.AbortWithError(http.StatusBadRequest, ErrorBindFailed.New(err))
+				return
 			}
 			if err := checkValueType(methodBody.APIType, requestBody); err != nil {
 				c.AbortWithError(http.StatusBadRequest, err)
@@ -316,6 +313,23 @@ func bindRoute(
 
 		outputFunc(c, code, responseBody.Example.Value)
 	})
+}
+
+func parseRequestBody(c *gin.Context, apiType parser.APIType) (reqbody parser.Value, err error) {
+	if c.Request.Method != "GET" {
+		mapbody := map[string]interface{}{}
+		if err = c.Bind(&mapbody); err != nil {
+			if err != io.EOF {
+				return
+			}
+		}
+		return parser.NewValue(mapbody)
+	}
+
+	if err = c.Request.ParseForm(); err != nil {
+		return
+	}
+	return parser.NewValueWithAPIType(apiType, c.Request.Form)
 }
 
 func bindDefaultResponse(
