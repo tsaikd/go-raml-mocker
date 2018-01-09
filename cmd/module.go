@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"context"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -64,7 +65,7 @@ go-raml-mocker --ramlfile "./raml/directory/path" --cache ".ramlcache" --proxy "
 		flagResources,
 		flagAllowRequiredPropertyToBeEmpty,
 	},
-	RunE: func(cmd *cobra.Command, args []string) error {
+	RunE: func(ctx context.Context, cmd *cobra.Command, args []string) error {
 		return mocker.Start(mocker.Config{
 			RAMLFile:                       flagFile.String(),
 			CheckRAMLVersion:               flagCheckRAMLVersion.Bool(),

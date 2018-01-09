@@ -1,9 +1,0 @@
-[submodule "vendor/github.com/tsaikd/KDGoLib"]
-	path = vendor/github.com/tsaikd/KDGoLib
-	url = https://github.com/tsaikd/KDGoLib
-[submodule "vendor/github.com/tsaikd/go-raml-parser"]
-	path = vendor/github.com/tsaikd/go-raml-parser
-	url = https://github.com/tsaikd/go-raml-parser
-[submodule "vendor/github.com/tsaikd/gin"]
-	path = vendor/github.com/tsaikd/gin
-	url = https://github.com/tsaikd/gin
